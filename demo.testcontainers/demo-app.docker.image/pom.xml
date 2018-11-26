@@ -1,0 +1,141 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>pl.twyszomirski.demo.testcontiners</groupId>
+		<artifactId>demo-parent</artifactId>
+		<version>0.0.1</version>
+	</parent>
+	
+    <artifactId>demo-app.docker.image</artifactId>
+    <version>0.0.1</version>
+	<packaging>pom</packaging>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>pl.twyszomirski.demo.testcontiners</groupId>
+            <artifactId>demo-app</artifactId>
+            <type>jar</type>
+			<version>0.0.1</version>
+        </dependency>
+    </dependencies>
+
+<properties>
+                <dockerHost>http://localhost:2375</dockerHost>
+
+</properties>
+	
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/docker</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/Dockerfile</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/Dockerfile</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        
+		 <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.23.0</version>
+                    <executions>
+                        <execution>
+                            <id>docker-perform</id>
+                            <goals>
+                                <goal>build</goal>
+                                <goal>push</goal>
+                            </goals>
+                            <configuration>
+                                <dockerHost>${dockerHost}</dockerHost>
+                                <images>
+                                    <image>
+                                        <name>pl/twyszomirski/${project.artifactId}:${project.version}</name>
+                                        <build>
+                                            <dockerFile>Dockerfile</dockerFile>
+                                            <tags>
+                                                <tag>${project.version}</tag>
+                                                <tag>latest</tag>
+                                            </tags>
+                                        </build>
+                                    </image>
+                                </images>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+		
+		<plugins>
+		
+		
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>docker-perform</id>
+                        <configuration>
+                            <dockerHost>${dockerHost}</dockerHost>
+                            <images>
+                                <image>
+                                    <name>pl/twyszomirski/${project.artifactId}:${project.version}</name>
+                                    <build>
+                                        <dockerFile>Dockerfile</dockerFile>
+                                        <assembly>
+                                            <descriptorRef>artifact-with-dependencies</descriptorRef>
+                                            <inline>
+                                                <dependencySets>
+                                                    <dependencySet>
+                                                        <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+                                                    </dependencySet>
+                                                </dependencySets>
+                                            </inline>
+                                        </assembly>
+                                    </build>
+                                </image>
+                            </images>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
