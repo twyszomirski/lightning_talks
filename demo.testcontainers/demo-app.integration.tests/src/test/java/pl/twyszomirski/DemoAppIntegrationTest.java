@@ -18,16 +18,14 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 
-public class DemoAppIntegrationTest{
+public class DemoAppIntegrationTest
+{
 
     private final static Logger LOG = LoggerFactory.getLogger( DemoAppIntegrationTest.class.getName() );
 
@@ -41,7 +39,8 @@ public class DemoAppIntegrationTest{
 
 
     @Before
-    public void init(){
+    public void init()
+    {
         setupDataSource();
     }
 
@@ -63,10 +62,9 @@ public class DemoAppIntegrationTest{
     public GenericContainer app = new GenericContainer( "pl/twyszomirski/demo-app.docker.image:0.0.1" )
         .withNetwork( network )
         .withNetworkAliases( "demo_app" )
-        .withCommand( "java","-Djava.security.egd=file:/dev/./urandom","-jar","/demo-app.jar" )
+        .withCommand( "java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/demo-app.jar" )
         .withExposedPorts( 8080 )
         .withLogConsumer( new Slf4jLogConsumer( LOG ) );
-
 
 
     @Test
@@ -74,14 +72,15 @@ public class DemoAppIntegrationTest{
     {
         int appPort = app.getMappedPort( 8080 );
         HttpClient client = HttpClientBuilder.create().build();
-        HttpResponse response = client.execute( new HttpGet( "http://localhost:"+appPort + "/demo/hello"));
+        HttpResponse response = client.execute(
+            new HttpGet( "http://localhost:" + appPort + "/demo/hello" ) );
 
         Assert.assertThat( response.getStatusLine().getStatusCode(), is( HttpStatus.SC_OK ) );
 
         ResultSet resultSet = performDatabaseQuery( "select count(*) from log_entry" );
         Assert.assertThat( resultSet.getInt( 1 ), is( 1 ) );
 
-        response = client.execute( new HttpGet( "http://localhost:"+appPort + "/demo/hello"));
+        response = client.execute( new HttpGet( "http://localhost:" + appPort + "/demo/hello" ) );
 
         Assert.assertThat( response.getStatusLine().getStatusCode(), is( HttpStatus.SC_OK ) );
 
@@ -90,12 +89,13 @@ public class DemoAppIntegrationTest{
 
     }
 
-    private void setupDataSource(){
+    private void setupDataSource()
+    {
         Integer mysqlPort = mysql.getMappedPort( 3306 );
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName( MYSQL_DRIVER );
-        hikariConfig.setJdbcUrl( "jdbc:mysql://localhost:" + mysqlPort + "/"+MYSQL_DATABASE );
+        hikariConfig.setJdbcUrl( "jdbc:mysql://localhost:" + mysqlPort + "/" + MYSQL_DATABASE );
         hikariConfig.setUsername( MYSQL_USER );
         hikariConfig.setPassword( MYSQL_PASSWORD );
 
