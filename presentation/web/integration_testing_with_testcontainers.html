@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Integration Testing With Org.TestContainers</title>
+
+    <meta name="description" content="Integration Testing With Org.TestContainers">
+    <meta name="author" content="Tomasz Wyszomirski">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <div class="slides">
+        <section>
+            <h2>Testy integracyjne z użyciem org.testcontainers</h2>
+            <p>
+                <small>Autor <a href="http://www.psi.pl">Tomasz Wyszomirski</a></small>
+            </p>
+        </section>
+
+            <section>
+                <h2>Co to są testy integracyjne?</h2>
+
+                <blockquote>      "Integration tests determine if independently developed units of software work correctly when they are connected to each other" 
+				<div>
+				<p><small>Martin Fowler  </small><p>
+				</div>
+				</blockquote>
+
+
+            </section>
+			
+			<section>
+                <h2>Co to jest Docker?</h2>
+
+                <blockquote>      "Docker to taki Vagrant tylko że lepszy" 
+				<div>
+				<p><small>Mądrość ludowa</small><p>
+				</div>
+				</blockquote>
+
+
+            </section>
+			
+			<section>
+                <h2>Co to jest org.testcontainers?</h2>
+
+                <blockquote>      "Testcontainers is a Java library that supports JUnit tests, providing lightweight, throwaway instances of common databases, Selenium web browsers, or anything else that can run in a Docker container." 
+				<div>
+				<p><small>org.testcontainers team</small><p>
+				</div>
+				</blockquote>
+
+
+            </section>
+			
+			<section data-background-image="images/unittest_lock.gif">
+                <h2>Dlaczego testy integracyje są potrzebne?</h2>
+
+               <div class="slide-background-content" style="background-image: url(&quot;http://i.giphy.com/90F8aUepslB84.gif&quot;);"></div>
+
+
+            </section>
+			
+			<section>
+                <h2>Demonstracja</h2>
+            </section>
+			
+			<section>
+                <h2>Co jeszcze mogę zrobić?</h2>
+				
+				<p class="fragment fade-up" data-fragment-index="1">Właściwie wszystko na co pozwala natywna konsola dockera</p>
+				<p class="fragment fade-up" data-fragment-index="2">i więcej ... </p>
+
+            </section>
+			
+			<section>
+                <h2>Oczekiwanie na start kontenera</h2>
+				
+									<p>Domyślnie jeżeli wystawiacie jakiś port to kontener zaczeka aż ten port bedzie "up" </p>
+
+									<p>Albo coś bardziej zaawansowanego </p>
+
+				
+				<pre><code class="hljs" data-trim>
+.waitingFor(
+   Wait.forHttp("/all")
+     .forStatusCode(200)
+     .forStatusCode(401)
+     .usingTls());
+					</code></pre>
+
+					<p>Albo </p>
+			<pre><code class="hljs" data-trim>
+			.waitingFor(Wait.forHealthcheck());
+					</code></pre>
+					
+            </section>
+			
+			<section>
+                <h2>Śledzenie wyjścia kontenera</h2>
+				
+									<p>To robiłem na demonstracji</p>
+
+				<pre><code class="hljs" data-trim>
+Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
+container.followOutput(logConsumer);
+					</code></pre>
+
+					<p>Niekoniecznie musi być STDOUT </p>
+			<pre><code class="hljs" data-trim>
+			container.followOutput(toStringConsumer, OutputType.STDERR);
+
+					</code></pre>
+					
+					<p>Można reagować na wyjście </p>
+			<pre><code class="hljs" data-trim>
+			consumer.waitUntil(frame -> 
+    frame.getUtf8String().contains("STARTED"), 30, TimeUnit.SECONDS);
+
+					</code></pre>
+					
+            </section>
+			
+			
+            <section>
+                <h2>Tryby użucia</h2>
+
+				<ul>
+                    <li>Pojedyńcze kontenery (tak jak ja to robię)</li>
+                    <li>Docker Compose (odpala się cały plik compose)</li>
+					<li>Dockerfile (ciekawa opcja, pozwala dynamicznie tworzyć obrazy)</li>
+                </ul>
+
+            </section>
+			
+			<section>
+                <h2>Dedykowane kontenery</h2>
+
+				
+				<p class="fragment grow" data-fragment-index="0">Cassandra</p>
+				<p class="fragment grow" data-fragment-index="1">Couchbase</p>
+				<p class="fragment grow" data-fragment-index="2">Influxdb</p>
+				<p class="fragment grow" data-fragment-index="3">Oracle-XE</p>
+				<p class="fragment grow" data-fragment-index="4">Kafka</p>
+				<p class="fragment grow" data-fragment-index="5">Spock</p>
+				<p class="fragment grow" data-fragment-index="6">ElasticSearch</p>
+				<p class="fragment grow" data-fragment-index="7">Sqlserver</p>
+
+               
+            </section>
+			
+			<section>
+                <h2>Ciekawe kontenery</h2>
+
+				
+				<p class="fragment grow" data-fragment-index="0">MockServer</p>
+				<p><small>http://www.mock-server.com/</small> <small>Jeżeli komponenty rozmawiają po HTTP pozwala fajnie i wygodnie mockować interakcje</small></p>
+				
+				<p class="fragment grow" data-fragment-index="1">Selenium</p>
+				
+				<p><small>https://www.seleniumhq.org/</small> <small>Gotowy kontener z zainstalowanymi wedriverami i selnium, fajny ficzer: robi screeny i nagrywa filmiki</small></p>
+
+               
+            </section>
+			
+		
+			
+
+        <section>
+            <h2>Dziękuje</h2>
+			
+			<p>https://github.com/twyszomirski/lightning_talks</p>
+        </section>
+
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide',
+
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'plugin/search/search.js', async: true},
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
